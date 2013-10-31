@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:inputType="textFilter"
         android:layout_weight="1"
-        android:textColor="#000000"
+        android:textColor="@color/compose_message_edit_text"
     />
 
     <ImageButton android:id="@+id/recipients_picker"
@@ -39,7 +39,6 @@
         android:layout_width="50dip"
         android:layout_height="fill_parent"
         android:layout_weight="0"
-        android:visibility="gone"
     />
 
 </LinearLayout>
