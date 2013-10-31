@@ -20,5 +20,19 @@
     <!-- QuickMessage -->
     <dimen name="qm_message_height">205dp</dimen>
     <dimen name="qm_dialog_button_bar_height">48dip</dimen>
+    
+    <dimen name="text_font_size_huge">18.0sp</dimen>
+    <dimen name="text_font_size_large">16.0sp</dimen>
+    <dimen name="text_font_size_medium">14.0sp</dimen>
+    <dimen name="text_font_size_small">12.0sp</dimen>
+    <dimen name="text_font_size_tiny">10.0sp</dimen>
 
+    <dimen name="conversation_list_item_primary_font_size">@dimen/text_font_size_huge</dimen>
+    <dimen name="conversation_list_item_secondary_font_size">@dimen/text_font_size_small</dimen>
+
+    <dimen name="message_bubble_padding_left_right">40dip</dimen>
+    <dimen name="message_text_size">@dimen/text_font_size_large</dimen>
+    <dimen name="message_body_font_size">@dimen/text_font_size_large</dimen>
+    <dimen name="message_body_secondary_font_size">@dimen/text_font_size_small</dimen>
+    
 </resources>

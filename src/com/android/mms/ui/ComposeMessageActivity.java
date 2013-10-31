@@ -58,6 +58,8 @@ import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.gesture.GestureOverlayView.OnGesturePerformedListener;
 import android.gesture.Prediction;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -323,7 +325,6 @@ public class ComposeMessageActivity extends Activity
     private TextView mSendButtonMms;        // Press to send mms
     private ImageButton mSendButtonSms;     // Press to send sms
     private EditText mSubjectTextEditor;    // Text editor for MMS subject
-    private ImageButton mQuickEmoji;
 
     private AttachmentEditor mAttachmentEditor;
     private View mAttachmentEditorScrollView;
@@ -355,7 +356,6 @@ public class ComposeMessageActivity extends Activity
     private AlertDialog mEmojiDialog;
     private View mEmojiView;
     private boolean mEnableEmojis;
-    private boolean mEnableQuickEmojis;
 
     private boolean mWaitingForSubActivity;
     private int mLastRecipientCount;            // Used for warning the user on too many recipients.
@@ -1829,6 +1829,7 @@ public class ComposeMessageActivity extends Activity
         String title = null;
         String subTitle = null;
         int cnt = list.size();
+        Drawable avatarDrawable = getResources().getDrawable(R.drawable.ic_contact_picture);;
         switch (cnt) {
             case 0: {
                 String recipient = null;
@@ -1846,6 +1847,7 @@ public class ComposeMessageActivity extends Activity
                     subTitle = PhoneNumberUtils.formatNumber(number, number,
                             MmsApp.getApplication().getCurrentCountryIso());
                 }
+                avatarDrawable = list.get(0).getAvatar(this, avatarDrawable);
                 break;
             }
             default: {
@@ -1860,6 +1862,15 @@ public class ComposeMessageActivity extends Activity
         ActionBar actionBar = getActionBar();
         actionBar.setTitle(title);
         actionBar.setSubtitle(subTitle);
+        actionBar.setLogo(scaleAvatar(avatarDrawable));
+    }
+
+    private Drawable scaleAvatar(Drawable avatar) {
+        if (avatar == null)
+            return avatar;
+        Bitmap bmp = ((BitmapDrawable)avatar).getBitmap();
+        int avatarSize = getResources().getDimensionPixelSize(R.dimen.avatar_width_height);
+        return new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bmp, avatarSize, avatarSize, true));
     }
 
     // Get the recipients editor ready to be displayed onscreen.
@@ -2001,14 +2012,6 @@ public class ComposeMessageActivity extends Activity
         mBackgroundQueryHandler = new BackgroundQueryHandler(mContentResolver);
 
         mEnableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
-        mEnableQuickEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_QUICK_EMOJIS, false);
-        if (mEnableQuickEmojis && mEnableEmojis) {
-            mQuickEmoji.setVisibility(View.VISIBLE);
-
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)mTextEditor.getLayoutParams();
-            params.setMargins(0, 0, 0, 0);
-            mTextEditor.setLayoutParams(params);
-        }
 
         initialize(savedInstanceState, 0);
 
@@ -3616,8 +3619,6 @@ public class ComposeMessageActivity extends Activity
         } else if (v == mRecipientsPicker) {
             Intent intent = new Intent(ComposeMessageActivity.this, AddRecipientsList.class);
             startActivityForResult(intent, REQUEST_CODE_ADD_RECIPIENTS);
-        } else if((v == mQuickEmoji)) {
-            showEmojiDialog();
         }
     }
 
@@ -3764,8 +3765,6 @@ public class ComposeMessageActivity extends Activity
         mAttachmentEditor = (AttachmentEditor) findViewById(R.id.attachment_editor);
         mAttachmentEditor.setHandler(mAttachmentEditorHandler);
         mAttachmentEditorScrollView = findViewById(R.id.attachment_editor_scroll_view);
-        mQuickEmoji = (ImageButton) mBottomPanel.findViewById(R.id.quick_emoji_button_mms);
-        mQuickEmoji.setOnClickListener(this);
     }
 
     private void confirmDeleteDialog(OnClickListener listener, boolean locked) {
@@ -4799,6 +4798,21 @@ public class ComposeMessageActivity extends Activity
         builder.setNegativeButton(android.R.string.cancel, null);
 
         builder.show();
+    }
+
+
+    /**
+     * If emojis are enabled we will show the emoji dialog, otherwise show the smiley dialog
+     * @param v
+     */
+    public void insertEmoji(View v) {
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences((Context) ComposeMessageActivity.this);
+        boolean enableEmojis = prefs.getBoolean(MessagingPreferenceActivity.ENABLE_EMOJIS, false);
+        if (enableEmojis)
+            showEmojiDialog();
+        else
+            showSmileyDialog();
     }
 
     @Override
