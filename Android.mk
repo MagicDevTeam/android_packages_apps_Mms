@@ -34,3 +34,4 @@ include $(BUILD_PACKAGE)
 
 # This finds and builds the test apk as well, so a single make does both.
 include $(call all-makefiles-under,$(LOCAL_PATH))
+
