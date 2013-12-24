@@ -18,8 +18,10 @@
 package com.android.mms.ui;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -34,11 +36,14 @@ import android.widget.QuickContactBadge;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.internal.util.mm.DeviceUtils;
 import com.android.mms.LogTag;
 import com.android.mms.R;
 import com.android.mms.data.Contact;
 import com.android.mms.data.ContactList;
 import com.android.mms.data.Conversation;
+
+import java.util.Locale;
 
 /**
  * This class manages the view for given conversation.
@@ -51,6 +56,7 @@ public class ConversationListItem extends RelativeLayout implements Contact.Upda
     private TextView mSubjectView;
     private TextView mFromView;
     private TextView mDateView;
+    private TextView mLocationView;
     private View mAttachmentView;
     private View mErrorIndicator;
     private QuickContactBadge mAvatarView;
@@ -84,6 +90,7 @@ public class ConversationListItem extends RelativeLayout implements Contact.Upda
         mSubjectView = (TextView) findViewById(R.id.subject);
 
         mDateView = (TextView) findViewById(R.id.date);
+        mLocationView = (TextView) findViewById(R.id.location);
         mAttachmentView = findViewById(R.id.attachment);
         mErrorIndicator = findViewById(R.id.error);
         mAvatarView = (QuickContactBadge) findViewById(R.id.avatar);
@@ -201,6 +208,25 @@ public class ConversationListItem extends RelativeLayout implements Contact.Upda
 
         // Register for updates in changes of any of the contacts in this conversation.
         ContactList contacts = conversation.getRecipients();
+
+        final boolean isChineseLocale = (DeviceUtils.isLocale(Locale.CHINA) || DeviceUtils.isLocale(
+                Locale.CHINESE));
+        Cursor cr = null;
+        try {
+            cr = context.getContentResolver().query(
+                    Uri.parse("content://com.magicmod.mmgeoprovider/CN/"
+                            + contacts.get(0).getNumber()), null, null, null, null);
+            if (cr.moveToFirst()) {
+                String location = cr.getString(0);
+                mLocationView.setText(location);
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+        } finally {
+            if (cr != null && !cr.isClosed()) {
+                cr.close();
+            }
+        }
 
         if (Log.isLoggable(LogTag.CONTACT, Log.DEBUG)) {
             Log.v(TAG, "bind: contacts.addListeners " + this);
