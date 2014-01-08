@@ -220,6 +220,10 @@ public class ConversationListItem extends RelativeLayout implements Contact.Upda
                 String location = cr.getString(0);
                 mLocationView.setText(location);
             }
+
+            if (cr != null && !cr.isClosed()) {
+                cr.close();
+            }
         } catch (Exception e) {
             // TODO: handle exception
         } finally {
